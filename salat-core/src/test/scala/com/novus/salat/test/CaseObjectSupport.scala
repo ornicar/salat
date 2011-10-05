@@ -53,5 +53,28 @@ class CaseObjectSupport extends SalatSpec {
         mine must_== mine_*
       }
     }
+
+    "support nested case objects" in {
+      "be able to serialize nested case objects" in {
+        val tree = Tree("a", Tree("b", Tree("c"), Tree("d")), Tree("e"))
+        log.info("tree: %s", tree)
+        val dbo: MongoDBObject = grater[Tree].asDBObject(tree)
+        log.info("dbo : %s", dbo)
+        val optionTrees = dbo.expand[BasicDBList]("trees")
+        optionTrees must beSome[BasicDBList]
+        val trees = optionTrees.get
+        val treeB: MongoDBObject = trees(0).asInstanceOf[DBObject]
+        val th = treeB.expand[String]("_typeHint")
+        th must beSome(tree.getClass.getName)
+        treeB.expand[String]("name") must_== Some("b")
+      }
+
+      "be able to deserialize case objects" in {
+        val tree = Tree("a", Tree("b", Tree("c"), Tree("d")), Tree("e"))
+        val dbo = grater[Tree].asDBObject(tree)
+        val tree_* = grater[Tree].asObject(dbo)
+        tree must_== tree_*
+      }
+    }
   }
 }

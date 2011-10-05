@@ -268,3 +268,12 @@ case class Turbo(name: String, ticker: String) extends Security
 case class Index(name: String) extends Contract
 
 case class Investments(contracts: List[Contract])
+
+case class Tree(name: String, trees: List[Tree]) {
+  override def toString = name + trees.mkString("(", ", ", ")")
+}
+
+object Tree {
+
+  def apply(name: String, trees: Tree*) = new Tree(name, trees.toList)
+}
